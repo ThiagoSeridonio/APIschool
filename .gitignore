@@ -1,0 +1,43 @@
+# Bytecode do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configuração de ambiente virtual
+venv/
+.env
+*.venv
+
+# Configuração do IDE/Editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Arquivos de log e temporários
+*.log
+*.out
+*.pid
+
+# Banco de dados SQLite
+*.sqlite3
+instance/
+migrations/
+
+# Arquivos gerados pelo Flask
+*.db
+*.db-journal
+
+# Dependências instaladas
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Cache do Flask
+instance/
+*.swp
+
+# Arquivos de deploy
+*.tar.gz
+*.zip
+*.bak
