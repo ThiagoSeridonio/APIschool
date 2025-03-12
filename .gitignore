@@ -8,6 +8,8 @@ __pycache__/
 venv/
 .env
 *.venv
+.venv
+.idea
 
 # Configuração do IDE/Editor
 .vscode/
