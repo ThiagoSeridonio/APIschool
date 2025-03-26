@@ -1,12 +1,11 @@
 import unittest
 import json
-
-from app import app
+from app import app  # Importa o objeto `app` do arquivo principal
 
 
 class TestFlaskApp(unittest.TestCase):
     def setUp(self):
-        self.app = app.test_client()
+        self.app = app.test_client()  # Configura o cliente de teste do Flask
         self.app.testing = True
 
     # Teste para verificar se nome e data de nascimento dos alunos e professores são strings no POST e PUT
