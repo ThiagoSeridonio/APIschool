@@ -1,27 +1,23 @@
 {
-    "professores": [ {
-      "id": 1,
-      "nome": "Carlos Silva",
-      "idade": 45,
-      "materia": "Matemática",
-      "observacoes": "Doutor em Educação"
+    "professores": [{
+        "nome": "João",
+        "nascimento": 26,
+        "materia": "História",
+        "observacoes": "Oi"
     }
-],
+
+    ],
     "turmas": [{
-        "id": 1,
-        "descricao": "Turma A - 2025",
+        "descricao": "oi",
         "professor_id": 1,
         "ativo": true
-      }
-    ],
+    }],
     "alunos": [{
-        "id": 1,
-        "nome": "Ana Souza",
-        "idade": 18,
+        "nome": "Polly",
+        "nascimento": "20000530",
         "turma_id": 1,
-        "data_nascimento": "2006-03-15",
-        "nota_primeiro_semestre": 8.5,
-        "nota_segundo_semestre": 9.0,
-        "media_final": 8.75
-      }]
+        "nota_1": 9.5,
+        "nota_2": 7.0
+
+    }]
 }
