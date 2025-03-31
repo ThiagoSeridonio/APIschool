@@ -1,5 +1,27 @@
 {
-    "professores": [],
-    "turmas": [],
-    "alunos": []
+    "professores": [ {
+      "id": 1,
+      "nome": "Carlos Silva",
+      "idade": 45,
+      "materia": "Matemática",
+      "observacoes": "Doutor em Educação"
+    }
+],
+    "turmas": [{
+        "id": 1,
+        "descricao": "Turma A - 2025",
+        "professor_id": 1,
+        "ativo": true
+      }
+    ],
+    "alunos": [{
+        "id": 1,
+        "nome": "Ana Souza",
+        "idade": 18,
+        "turma_id": 1,
+        "data_nascimento": "2006-03-15",
+        "nota_primeiro_semestre": 8.5,
+        "nota_segundo_semestre": 9.0,
+        "media_final": 8.75
+      }]
 }
