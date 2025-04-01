@@ -1,23 +1,28 @@
 {
-    "professores": [{
-        "nome": "João",
-        "nascimento": 26,
-        "materia": "História",
-        "observacoes": "Oi"
-    }
-
+    "professores": [
+        {
+            "data_nascimento": "1980-05-15",
+            "disciplina": "MatemÃ¡tica",
+            "nome": "Carlos Silva",
+            "salario": 5000.0,
+            "id": "ae06e4be-a879-43fb-89a4-41dc685714df"
+        }
     ],
-    "turmas": [{
-        "descricao": "oi",
-        "professor_id": 1,
-        "ativo": true
-    }],
-    "alunos": [{
-        "nome": "Polly",
-        "nascimento": "20000530",
-        "turma_id": 1,
-        "nota_1": 9.5,
-        "nota_2": 7.0
-
-    }]
+    "turmas": [
+        {
+            "capacidade": 30,
+            "nome": "Turma A",
+            "turno": "Manhã",
+            "id": "a2365b39-2066-4b4c-8b4b-3d50fa7d3418"
+        }
+    ],
+    "alunos": [
+        {
+            "data_nascimento": "2005-09-12",
+            "nome": "Ana Souza",
+            "nota_primeiro_semestre": 8.5,
+            "nota_segundo_semestre": 9.0,
+            "id": "ea972168-2a00-48fa-83e5-884e23969182"
+        }
+    ]
 }

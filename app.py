@@ -5,8 +5,31 @@ import re
 
 app = Flask(__name__)
 
+def validar_aluno(novo_aluno):
+    """Função para validar os dados do aluno"""
+
+    campos_obrigatorios = ["nome", "data_nascimento", "nota_primeiro_semestre", "nota_segundo_semestre"]
+
+    for campo in campos_obrigatorios:
+        if campo not in novo_aluno:
+            return f"O campo '{campo}' é obrigatório.", 400
+
+    if not isinstance(novo_aluno["nome"], str) or not re.match(r"^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$", novo_aluno["nome"]):
+        return "O nome deve ser uma string válida sem caracteres especiais.", 400
+
+    if not isinstance(novo_aluno["data_nascimento"], str) or not re.match(r"^\d{4}-\d{2}-\d{2}$", novo_aluno["data_nascimento"]):
+        return "A data de nascimento deve estar no formato YYYY-MM-DD.", 400
+
+    try:
+        novo_aluno["nota_primeiro_semestre"] = float(novo_aluno["nota_primeiro_semestre"])
+        novo_aluno["nota_segundo_semestre"] = float(novo_aluno["nota_segundo_semestre"])
+    except ValueError:
+        return "As notas devem ser valores numéricos.", 400
+
+    return None  
+
 def validar_nome(nome):
-    return isinstance(nome, str) and nome.strip() and not re.search(r"[^a-zA-ZÀ-ÿ\s]", nome)
+    return isinstance(nome, str) and re.match(r"^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$", nome)
 
 def validar_data(data):
     return isinstance(data, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", data)
@@ -43,13 +66,13 @@ def post_professor():
     novo_professor = request.json
 
     if not validar_nome(novo_professor.get("nome")):
-        return jsonify({"erro": "Nome inválido"}), 400
+        return jsonify({"erro": "Nome inválido. Não use caracteres especiais."}), 400
     if not validar_data(novo_professor.get("data_nascimento")):
-        return jsonify({"erro": "Data de nascimento inválida"}), 400
+        return jsonify({"erro": "Data de nascimento inválida. Use o formato YYYY-MM-DD."}), 400
     if not isinstance(novo_professor.get("disciplina"), str) or not novo_professor["disciplina"].strip():
-        return jsonify({"erro": "Disciplina inválida"}), 400
+        return jsonify({"erro": "Disciplina inválida. Deve ser uma string não vazia."}), 400
     if not isinstance(novo_professor.get("salario"), (float, int)):
-        return jsonify({"erro": "Salário inválido"}), 400
+        return jsonify({"erro": "Salário inválido. Deve ser um número."}), 400
 
     novo_professor["id"] = db.Database.gerar_uuid()
     data["professores"].append(novo_professor)
@@ -93,6 +116,14 @@ def get_turma(id):
 def post_turma():
     data = db.Database.load_data()
     nova_turma = request.json
+
+    if not validar_nome(nova_turma.get("nome")):
+        return jsonify({"erro": "Nome da turma inválido. Não use caracteres especiais."}), 400
+    if not isinstance(nova_turma.get("turno"), str) or not nova_turma["turno"].strip():
+        return jsonify({"erro": "Turno inválido. Deve ser uma string não vazia."}), 400
+    if not isinstance(nova_turma.get("capacidade"), int) or nova_turma["capacidade"] <= 0:
+        return jsonify({"erro": "Capacidade inválida. Deve ser um número inteiro positivo."}), 400
+
     nova_turma["id"] = db.Database.gerar_uuid()
     data["turmas"].append(nova_turma)
     db.Database.save_data(data)
@@ -134,9 +165,22 @@ def get_aluno(id):
 def post_aluno():
     data = db.Database.load_data()
     novo_aluno = request.json
+
+    if not validar_nome(novo_aluno.get("nome")):
+        return jsonify({"erro": "Nome inválido. Não use caracteres especiais."}), 400
+    if not validar_data(novo_aluno.get("data_nascimento")):
+        return jsonify({"erro": "Data de nascimento inválida. Use o formato YYYY-MM-DD."}), 400
+
+    try:
+        novo_aluno["nota_primeiro_semestre"] = float(novo_aluno["nota_primeiro_semestre"])
+        novo_aluno["nota_segundo_semestre"] = float(novo_aluno["nota_segundo_semestre"])
+    except ValueError:
+        return jsonify({"erro": "As notas devem ser valores numéricos."}), 400
+
     novo_aluno["id"] = db.Database.gerar_uuid()
     data["alunos"].append(novo_aluno)
     db.Database.save_data(data)
+
     return jsonify(novo_aluno), 201
 
 @app.route("/alunos/<string:id>", methods=["PUT"])
