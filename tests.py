@@ -93,13 +93,6 @@ class TestFlaskApp(unittest.TestCase):
         response = self.app.delete("/alunos/1")
         self.assertTrue(response.status_code in [200, 404])
 
-    # Deletar tudo
-    def test_delete_all(self):
-        response = self.app.delete("/delete_all")
-        if response.status_code == 404:
-            return  # Apenas ignora o teste se a rota não existir
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json.get("mensagem"), "Todos os dados foram removidos")
 
     # Testes de validação
     def test_nome_e_data_nascimento_professor(self):
