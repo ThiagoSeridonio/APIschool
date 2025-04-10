@@ -2,12 +2,32 @@ import unittest
 import json
 from app import app
 
+
 class TestFlaskApp(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
         self.app.testing = True
-        
+
+        # Simulação do conteúdo inicial do database.json
+        self.mock_db_data = {
+            "professores": [],
+            "alunos": [],
+            "turmas": []
+        }
+
+        mock_file_data = json.dumps(self.mock_db_data)
+
+        self.patcher = patch(
+            "builtins.open", mock_open(read_data=mock_file_data))
+        self.mock_open = self.patcher.start()
+
+        self.mock_open.return_value.__enter__.return_value.write = lambda s: None
+
+    def tearDown(self):
+        self.patcher.stop()
+
     # Professores
+
     def test_get_professores(self):
         response = self.app.get("/professores")
         self.assertEqual(response.status_code, 200)
@@ -86,15 +106,16 @@ class TestFlaskApp(unittest.TestCase):
         self.assertIn("id", response.json)
 
     def test_put_aluno(self):
-        response = self.app.put("/alunos/1", json={"nota_primeiro_semestre": 9.0})
+        response = self.app.put(
+            "/alunos/1", json={"nota_primeiro_semestre": 9.0})
         self.assertTrue(response.status_code in [200, 404])
 
     def test_delete_aluno(self):
         response = self.app.delete("/alunos/1")
         self.assertTrue(response.status_code in [200, 404])
 
-
     # Testes de validação
+
     def test_nome_e_data_nascimento_professor(self):
         response = self.app.post('/professores', json={
             "nome": 123, "disciplina": "Matemática", "data_nascimento": "1980-12-01", "salario": 3000.50
@@ -129,6 +150,7 @@ class TestFlaskApp(unittest.TestCase):
             "nome": "Turma!A", "turno": "Manhã", "capacidade": 25
         })
         self.assertEqual(response.status_code, 400)
+
 
 if __name__ == '__main__':
     unittest.main()
