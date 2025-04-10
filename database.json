@@ -2,17 +2,17 @@
     "professores": [
         {
             "data_nascimento": "1980-05-15",
-            "disciplina": "MatemÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡tica",
-            "nome": "Polly",
+            "disciplina": "Historia",
+            "nome": "Vitor",
             "salario": 5000.0,
-            "id": "9b4c879c-64db-4f7b-975d-401434cbe42c"
+            "id": "ab5a6991-0d65-4613-9d9b-7c34aa3f02b3"
         }
     ],
     "turmas": [
         {
             "capacidade": 40,
-            "nome": "Oi",
-            "turno": "noite",
+            "nome": "Turma A",
+            "turno": "Noite",
             "id": "25962539-47ef-4dfe-ba69-aab93d9eb269"
         }
     ],
