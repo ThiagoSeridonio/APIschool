@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from model import turmas_models as model
+from model.turmas_models import ErroValidacao, ErroTurmaNaoEncontrada
 
 turmas_rotas = Blueprint("turmas_rotas", __name__)
 
@@ -9,35 +10,34 @@ def get_turmas():
 
 @turmas_rotas.route("/turmas/<string:id>", methods=["GET"])
 def get_turma(id):
-    turma = model.buscar_turma_por_id(id)
-    if turma:
+    try:
+        turma = model.buscar_turma_por_id(id)
         return jsonify(turma)
-    return jsonify({"erro": "Turma não encontrada"}), 404
+    except ErroValidacao as e:
+        return jsonify({"erro": str(e)}), e.status
 
 @turmas_rotas.route("/turmas", methods=["POST"])
 def post_turma():
-    nova_turma = request.json
-    erro = model.validar_turma(nova_turma)
-    if erro:
-        return jsonify({"erro": erro[0]}), erro[1]
-
-    turma = model.adicionar_turma(nova_turma)
-    return jsonify(turma), 201
+    try:
+        nova_turma = request.json
+        turma = model.adicionar_turma(nova_turma)
+        return jsonify(turma), 201
+    except ErroValidacao as e:
+        return jsonify({"erro": str(e)}), e.status
 
 @turmas_rotas.route("/turmas/<string:id>", methods=["PUT"])
 def update_turma(id):
-    dados = request.json
-
-    if "nome" in dados and not model.validar_nome(dados["nome"]):
-        return jsonify({"erro": "Nome da turma inválido."}), 400
-
-    turma = model.atualizar_turma(id, dados)
-    if turma:
+    try:
+        dados = request.json
+        turma = model.atualizar_turma(id, dados)
         return jsonify(turma)
-    return jsonify({"erro": "Turma não encontrada"}), 404
+    except ErroValidacao as e:
+        return jsonify({"erro": str(e)}), e.status
 
 @turmas_rotas.route("/turmas/<string:id>", methods=["DELETE"])
 def delete_turma(id):
-    if model.remover_turma(id):
+    try:
+        model.remover_turma(id)
         return jsonify({"mensagem": "Turma removida com sucesso"})
-    return jsonify({"erro": "Turma não encontrada"}), 404
+    except ErroValidacao as e:
+        return jsonify({"erro": str(e)}), e.status
