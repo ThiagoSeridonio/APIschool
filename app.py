@@ -1,6 +1,6 @@
-from professores.professores_rotas import prof_rotas
-from alunos.alunos_rotas import alunos_rotas
-from turmas.turmas_rotas import turmas_rotas
+from controller.professores_rotas import prof_rotas
+from controller.alunos_rotas import alunos_rotas
+from controller.turmas_rotas import turmas_rotas
 from config import app
 from flask import Flask, jsonify, request
 import database as db
