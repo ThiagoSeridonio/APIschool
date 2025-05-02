@@ -1,54 +1,60 @@
-from flask import Blueprint, jsonify, request
-from model import alunos_models as model
+from flask import Blueprint, request, jsonify
+from model.alunos_models import Aluno
+from config import db
+import re
 
-alunos_rotas = Blueprint("alunos_rotas", __name__)
+alunos_rotas = Blueprint('alunos', __name__)
 
-@alunos_rotas.route("/alunos", methods=["GET"])
-def get_alunos():
-    return jsonify(model.listar_alunos())
+@alunos_rotas.route('/alunos', methods=['GET'], strict_slashes=False)
+def listar_alunos():
+    alunos = Aluno.query.all()
+    return jsonify([aluno.to_dict() for aluno in alunos]), 200
 
-@alunos_rotas.route("/alunos/<string:id>", methods=["GET"])
-def get_aluno(id):
-    aluno = model.buscar_aluno_por_id(id)
-    if aluno:
-        return jsonify(aluno)
-    return jsonify({"erro": "Aluno não encontrado"}), 404
+@alunos_rotas.route('/alunos/<int:id>', methods=['GET'], strict_slashes=False)
+def buscar_aluno(id):
+    aluno = Aluno.query.get_or_404(id)
+    return jsonify(aluno.to_dict()), 200
 
-@alunos_rotas.route("/alunos", methods=["POST"])
-def post_aluno():
-    novo_aluno = request.json
-    erro = model.validar_aluno(novo_aluno)
-    if erro:
-        return jsonify({"erro": erro[0]}), erro[1]
+@alunos_rotas.route('/alunos', methods=['POST'], strict_slashes=False)
+def criar_aluno():
+    dados = request.get_json()
 
-    aluno = model.adicionar_aluno(novo_aluno)
-    return jsonify(aluno), 201
+    if 'nome' not in dados or not dados['nome']:
+        return jsonify({'erro': 'Nome é obrigatório'}), 400
 
-@alunos_rotas.route("/alunos/<string:id>", methods=["PUT"])
-def update_aluno(id):
-    dados = request.json
+    if not isinstance(dados['nome'], str) or not re.match(r'^[A-Za-zÀ-ÿ\s]+$', dados['nome']):
+        return jsonify({'erro': 'Nome inválido. Apenas letras e espaços são permitidos.'}), 400
 
-    # validações parciais, se quiser
-    if "nome" in dados and not model.validar_nome(dados["nome"]):
-        return jsonify({"erro": "Nome inválido."}), 400
-    if "data_nascimento" in dados and not model.validar_data(dados["data_nascimento"]):
-        return jsonify({"erro": "Data inválida."}), 400
+    if 'data_nascimento' not in dados or not dados['data_nascimento']:
+        return jsonify({'erro': 'Data de nascimento é obrigatória'}), 400
 
     try:
-        if "nota_primeiro_semestre" in dados:
-            dados["nota_primeiro_semestre"] = float(dados["nota_primeiro_semestre"])
-        if "nota_segundo_semestre" in dados:
-            dados["nota_segundo_semestre"] = float(dados["nota_segundo_semestre"])
-    except ValueError:
-        return jsonify({"erro": "Notas devem ser numéricas."}), 400
+        novo_aluno = Aluno(
+            nome=dados['nome'],
+            data_nascimento=dados['data_nascimento'],
+            nota1=dados.get('nota1', 0.0),
+            nota2=dados.get('nota2', 0.0)
+        )
+        db.session.add(novo_aluno)
+        db.session.commit()
+        return jsonify(novo_aluno.to_dict()), 201
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 400
 
-    aluno = model.atualizar_aluno(id, dados)
-    if aluno:
-        return jsonify(aluno)
-    return jsonify({"erro": "Aluno não encontrado"}), 404
 
-@alunos_rotas.route("/alunos/<string:id>", methods=["DELETE"])
-def delete_aluno(id):
-    if model.remover_aluno(id):
-        return jsonify({"mensagem": "Aluno removido com sucesso"})
-    return jsonify({"erro": "Aluno não encontrado"}), 404
+@alunos_rotas.route('/alunos/<int:id>', methods=['PUT'], strict_slashes=False)
+def atualizar_aluno(id):
+    aluno = Aluno.query.get_or_404(id)
+    dados = request.get_json()
+    aluno.nome = dados.get('nome', aluno.nome)
+    aluno.data_nascimento = dados.get('data_nascimento', aluno.data_nascimento)
+    aluno.notas = dados.get('notas', aluno.notas)
+    db.session.commit()
+    return jsonify(aluno.to_dict()), 200
+
+@alunos_rotas.route('/alunos/<int:id>', methods=['DELETE'], strict_slashes=False)
+def deletar_aluno(id):
+    aluno = Aluno.query.get_or_404(id)
+    db.session.delete(aluno)
+    db.session.commit()
+    return jsonify({'mensagem': 'Aluno deletado com sucesso.'}), 200

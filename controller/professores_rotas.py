@@ -1,55 +1,80 @@
-from flask import Blueprint, jsonify, request
-from model import professores_models as model
+from flask import Blueprint, request, jsonify
+from model.professores_models import Professor
+from model.turmas_models import Turma
+from config import db
+import re
 
-prof_rotas = Blueprint("prof_rotas", __name__)
+prof_rotas = Blueprint('professores', __name__)
 
-@prof_rotas.route("/professores", methods=["GET"])
-def get_professores():
-    return jsonify(model.listar_professores())
+@prof_rotas.route('/professores', methods=['GET'], strict_slashes=False)
+def listar_professores():
+    professores = Professor.query.all()
+    return jsonify([p.to_dict() for p in professores])
 
-@prof_rotas.route("/professores/<string:id>", methods=["GET"])
-def get_professor(id):
-    professor = model.buscar_professor_por_id(id)
+@prof_rotas.route('/professores/<int:id>', methods=['GET'], strict_slashes=False)
+def obter_professor(id):
+    professor = Professor.query.get(id)
     if professor:
-        return jsonify(professor)
-    return jsonify({"erro": "Professor não encontrado"}), 404
+        return jsonify(professor.to_dict())
+    return jsonify({'erro': 'Professor não encontrado'}), 404
 
-@prof_rotas.route("/professores", methods=["POST"])
-def post_professor():
-    novo = request.json
+@prof_rotas.route('/professores', methods=['POST'], strict_slashes=False)
+def criar_professor():
+    dados = request.get_json()
+    print(dados)
+    
+    if 'email' not in dados:
+        return {'erro': 'Email é obrigatório'}, 400
+    
+    existing_professor = Professor.query.filter_by(email=dados['email']).first()
+    if existing_professor:
+        return jsonify({'erro': 'Email já cadastrado'}), 400
+    
+    if not dados.get('nome'):
+        return jsonify({'erro': 'Nome é obrigatório'}), 400
+    
+    if not dados.get('data_nascimento'):
+        return jsonify({'erro': 'Data de nascimento é obrigatória'}), 400
+    
+    if not re.match(r"^[A-Za-zÀ-ÿ\s\.\-]+$", dados.get('nome', '')):
+        return jsonify({'erro': 'Nome contém caracteres inválidos'}), 400
 
-    if not model.validar_nome(novo.get("nome")):
-        return jsonify({"erro": "Nome inválido. Não use caracteres especiais."}), 400
-    if not model.validar_data(novo.get("data_nascimento")):
-        return jsonify({"erro": "Data de nascimento inválida. Use o formato YYYY-MM-DD."}), 400
-    if not isinstance(novo.get("disciplina"), str) or not novo["disciplina"].strip():
-        return jsonify({"erro": "Disciplina inválida. Deve ser uma string não vazia."}), 400
-    if not isinstance(novo.get("salario"), (float, int)):
-        return jsonify({"erro": "Salário inválido. Deve ser um número."}), 400
+    try:
+        novo_professor = Professor(
+            nome=dados['nome'],
+            data_nascimento=dados['data_nascimento'],
+            disciplina=dados.get('disciplina', ''),
+            salario=dados.get('salario', None),
+            email=dados['email']
+        )
+        db.session.add(novo_professor)
+        db.session.commit()
+        return jsonify(novo_professor.to_dict()), 201
+    except Exception as e:
+        print(f"Erro: {e}") 
+        return jsonify({'erro': str(e)}), 400
 
-    professor = model.adicionar_professor(novo)
-    return jsonify(professor), 201
 
-@prof_rotas.route("/professores/<string:id>", methods=["PUT"])
-def update_professor(id):
-    dados = request.json
+@prof_rotas.route('/professores/<int:id>', methods=['PUT'], strict_slashes=False)
+def atualizar_professor(id):
+    professor = Professor.query.get(id)
+    if not professor:
+        return jsonify({'erro': 'Professor não encontrado'}), 404
 
-    if "nome" in dados and not model.validar_nome(dados["nome"]):
-        return jsonify({"erro": "Nome inválido."}), 400
-    if "data_nascimento" in dados and not model.validar_data(dados["data_nascimento"]):
-        return jsonify({"erro": "Data inválida."}), 400
-    if "disciplina" in dados and (not isinstance(dados["disciplina"], str) or not dados["disciplina"].strip()):
-        return jsonify({"erro": "Disciplina inválida."}), 400
-    if "salario" in dados and not isinstance(dados["salario"], (float, int)):
-        return jsonify({"erro": "Salário inválido."}), 400
+    dados = request.get_json()
+    for chave, valor in dados.items():
+        setattr(professor, chave, valor)
+    db.session.commit()
+    return jsonify(professor.to_dict())
 
-    professor = model.atualizar_professor(id, dados)
-    if professor:
-        return jsonify(professor)
-    return jsonify({"erro": "Professor não encontrado"}), 404
+@prof_rotas.route('/professores/<int:id>', methods=['DELETE'], strict_slashes=False)
+def deletar_professor(id):
+    professor = Professor.query.get_or_404(id)
 
-@prof_rotas.route("/professores/<string:id>", methods=["DELETE"])
-def delete_professor(id):
-    if model.remover_professor(id):
-        return jsonify({"mensagem": "Professor removido com sucesso"})
-    return jsonify({"erro": "Professor não encontrado"}), 404
+    turmas_vinculadas = Turma.query.filter_by(professor_id=id).all()
+    if turmas_vinculadas:
+        return jsonify({"erro": "Não é possível deletar o professor. Ele está vinculado a uma ou mais turmas."}), 400
+
+    db.session.delete(professor)
+    db.session.commit()
+    return jsonify({"mensagem": "Professor deletado com sucesso"}), 200

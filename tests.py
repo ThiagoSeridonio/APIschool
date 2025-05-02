@@ -1,31 +1,26 @@
 import unittest
 import json
-from app import app
+from app import app, db
 from unittest.mock import mock_open, patch
+from uuid import uuid4
 
 
 class TestFlaskApp(unittest.TestCase):
     def setUp(self):
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
         self.app = app.test_client()
-        self.app.testing = True
+        self.client = self.app
 
-        # Simulação do conteúdo inicial do database.json
-        self.mock_db_data = {
-            "professores": [],
-            "alunos": [],
-            "turmas": []
-        }
-
-        mock_file_data = json.dumps(self.mock_db_data)
-
-        self.patcher = patch(
-            "builtins.open", mock_open(read_data=mock_file_data))
-        self.mock_open = self.patcher.start()
-
-        self.mock_open.return_value.__enter__.return_value.write = lambda s: None
+        with app.app_context():
+            db.create_all()
 
     def tearDown(self):
-        self.patcher.stop()
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
 
     # Professores
 
@@ -43,12 +38,14 @@ class TestFlaskApp(unittest.TestCase):
             "nome": "Carlos Silva",
             "data_nascimento": "1980-05-15",
             "disciplina": "Matemática",
-            "salario": 5000.0
+            "salario": 5000.0,
+            "email": f"prof_{uuid4()}@email.com"
         }
         response = self.app.post("/professores", json=novo_professor)
+        print(response.json)
         self.assertEqual(response.status_code, 201)
         self.assertIn("id", response.json)
-
+     
     def test_put_professor(self):
         response = self.app.put("/professores/1", json={"salario": 5500.0})
         self.assertTrue(response.status_code in [200, 404])
@@ -68,15 +65,28 @@ class TestFlaskApp(unittest.TestCase):
         self.assertTrue(response.status_code in [200, 404])
 
     def test_post_turma(self):
+        novo_professor = {
+        "nome": "Joana Lima",
+        "email": "joana@email.com",
+        "data_nascimento": "1985-03-22",
+        "disciplina": "História",
+        "salario": 4800.0
+        }
+        
+        self.client.post('/professores', json=novo_professor)
+        
+        response_prof = self.client.get('/professores')
+        prof_id = response_prof.get_json()[-1]['id']
+        
         nova_turma = {
             "nome": "Turma A",
             "turno": "Manhã",
-            "capacidade": 30
+            "capacidade": 30,
+            "professor_id": prof_id
         }
         response = self.app.post("/turmas", json=nova_turma)
         self.assertEqual(response.status_code, 201)
-        self.assertIn("id", response.json)
-
+        
     def test_put_turma(self):
         response = self.app.put("/turmas/1", json={"capacidade": 35})
         self.assertTrue(response.status_code in [200, 404])
@@ -99,8 +109,8 @@ class TestFlaskApp(unittest.TestCase):
         novo_aluno = {
             "nome": "Ana Souza",
             "data_nascimento": "2005-09-12",
-            "nota_primeiro_semestre": 8.5,
-            "nota_segundo_semestre": 9.0
+            "nota1": 8.5,
+            "nota2": 9.0
         }
         response = self.app.post("/alunos", json=novo_aluno)
         self.assertEqual(response.status_code, 201)
@@ -119,13 +129,15 @@ class TestFlaskApp(unittest.TestCase):
 
     def test_nome_e_data_nascimento_professor(self):
         response = self.app.post('/professores', json={
-            "nome": 123, "disciplina": "Matemática", "data_nascimento": "1980-12-01", "salario": 3000.50
-        })
+        "nome": "Professor Teste",
+        "data_nascimento": "1980-05-10"
+    })
         self.assertEqual(response.status_code, 400)
+        
 
     def test_nome_e_data_nascimento_aluno(self):
         response = self.app.post('/alunos', json={
-            "nome": 456, "data_nascimento": "2005-05-15", "nota_primeiro_semestre": 8.5, "nota_segundo_semestre": 9.0
+            "nome": 456, "data_nascimento": "2005-05-15", "nota1": 8.5, "nota2": 9.0
         })
         self.assertEqual(response.status_code, 400)
 
@@ -143,7 +155,7 @@ class TestFlaskApp(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
         response = self.app.post('/professores', json={
-            "nome": "Dr. *Roberto*", "disciplina": "Química", "data_nascimento": "1975-09-23", "salario": 4500.00
+            "nome": "Dr. *Roberto*", "disciplina": "Química", "data_nascimento": "1975-09-23", "salario": 4500.00,  "email": "joao@email.com"
         })
         self.assertEqual(response.status_code, 400)
 
