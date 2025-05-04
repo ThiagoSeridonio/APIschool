@@ -8,10 +8,8 @@ api = Namespace('Turmas', description='Operações com turmas')
 
 # Modelo de entrada/saída para a API (Swagger)
 turma_model = api.model('Turma', {
-    'id': fields.Integer(readOnly=True, description='ID da turma'),
     'nome': fields.String(required=True, description='Nome da turma'),
     'professor_id': fields.Integer(required=True, description='ID do professor responsável'),
-    'professor_nome': fields.String(readOnly=True, description='Nome do professor'),
     'alunos': fields.List(fields.Integer, description='Lista de IDs dos alunos')
 })
 

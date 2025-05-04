@@ -6,13 +6,11 @@ api = Namespace('Professores', description='Operações com professores')
 
 # Modelo para documentação Swagger
 professor_model = api.model('Professor', {
-    'id': fields.Integer(readOnly=True, description='ID do professor'),
     'nome': fields.String(required=True, description='Nome do professor'),
     'email': fields.String(required=True, description='Email do professor'),
     'data_nascimento': fields.String(required=True, description='Data de nascimento (YYYY-MM-DD)'),
     'disciplina': fields.String(required=True, description='Disciplina ministrada'),
-    'salario': fields.Float(required=True, description='Salário do professor'),
-    'idade': fields.Integer(readOnly=True, description='Idade calculada')
+    'salario': fields.Float(required=True, description='Salário do professor')
 })
 
 @api.route('/')
