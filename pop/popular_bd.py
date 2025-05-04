@@ -15,7 +15,7 @@ with app.app_context():
     db.session.commit()
 
     # Criar alunos
-    aluno1 = Aluno(nome="João Oliveira", data_nascimento="2005-03-15", nota1=8.0, nota2=7.5)
+    aluno1 = Aluno(nome="Joao Oliveira", data_nascimento="2005-03-15", nota1=8.0, nota2=7.5)
     aluno2 = Aluno(nome="Maria Souza", data_nascimento="2004-11-02", nota1=9.0, nota2=8.5)
     aluno3 = Aluno(nome="Lucas Lima", data_nascimento="2005-07-22", nota1=6.0, nota2=7.0)
 
