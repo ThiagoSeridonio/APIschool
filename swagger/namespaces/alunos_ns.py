@@ -6,10 +6,13 @@ api = Namespace('Alunos', description='Operações com alunos')
 
 # Modelo para serialização no Swagger
 aluno_model = api.model('Aluno', {
+    'id': fields.Integer(readOnly=True, description='ID do aluno'),
     'nome': fields.String(required=True, description='Nome do aluno'),
     'data_nascimento': fields.String(required=True, description='Data de nascimento (YYYY-MM-DD)'),
     'nota1': fields.Float(required=False, description='Nota do primeiro semestre'),
-    'nota2': fields.Float(required=False, description='Nota do segundo semestre')
+    'nota2': fields.Float(required=False, description='Nota do segundo semestre'),
+    'media': fields.Float(readOnly=True, description='Média calculada'),
+    'idade': fields.Integer(readOnly=True, description='Idade calculada'),
 })
 
 @api.route('/')
