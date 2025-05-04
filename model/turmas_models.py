@@ -9,7 +9,6 @@ class Turma(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), nullable=False)
     professor_id = db.Column(db.Integer, db.ForeignKey('professores.id'), nullable=False)
-
     professor = db.relationship('Professor', backref=db.backref('turmas', lazy=True))
     alunos = db.relationship('Aluno', secondary='alunos_turmas', backref='turmas')
 
