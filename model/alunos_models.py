@@ -53,8 +53,8 @@ class NomeInvalidoErro(ErroValidacao):
         super().__init__("O nome deve ser uma string válida sem caracteres especiais.")
 
 class DataInvalidaErro(ErroValidacao):
-    def __init__(self):
-        super().__init__("A data de nascimento deve estar no formato YYYY-MM-DD.")
+    def __init__(self, mensagem):
+        super().__init__(mensagem)
 
 class NotaInvalidaErro(ErroValidacao):
     def __init__(self):

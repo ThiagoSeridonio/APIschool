@@ -1,12 +1,15 @@
 from controller.professores_rotas import prof_rotas
 from controller.alunos_rotas import alunos_rotas
 from controller.turmas_rotas import turmas_rotas
+from swagger.swagger_config import configure_swagger
 from config import app, db
 import os
 
 app.register_blueprint(prof_rotas)
 app.register_blueprint(alunos_rotas)
 app.register_blueprint(turmas_rotas)
+
+configure_swagger(app)
 
 @app.route("/")
 def index():

@@ -48,7 +48,8 @@ def atualizar_aluno(id):
     dados = request.get_json()
     aluno.nome = dados.get('nome', aluno.nome)
     aluno.data_nascimento = dados.get('data_nascimento', aluno.data_nascimento)
-    aluno.notas = dados.get('notas', aluno.notas)
+    aluno.nota1 = dados.get('nota1', aluno.nota1)
+    aluno.nota2 = dados.get('nota2', aluno.nota2)
     db.session.commit()
     return jsonify(aluno.to_dict()), 200
 
