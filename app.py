@@ -8,6 +8,10 @@ app.register_blueprint(prof_rotas)
 app.register_blueprint(alunos_rotas)
 app.register_blueprint(turmas_rotas)
 
+@app.route("/")
+def index():
+    return "API Flask rodando com sucesso no Render!"
+
 with app.app_context():
     db.create_all()
 
