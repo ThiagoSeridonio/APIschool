@@ -1,7 +1,7 @@
 import requests
 
 # IDs dos alunos que você quer deletar
-ids_para_deletar = [1, 2, 3, 4]  # Altere conforme necessário
+ids_para_deletar = [1, 2, 3]  # Altere conforme necessário
 
 url_base = "http://127.0.0.1:5000/alunos"
 
