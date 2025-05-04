@@ -2,7 +2,7 @@ import requests
 
 alunos = [
     {
-        "nome": "João Silva",
+        "nome": "Joao Silva",
         "data_nascimento": "10/01/2000",
         "nota1": 8.5,
         "nota2": 7.0
